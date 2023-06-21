@@ -1,12 +1,15 @@
 ---
 title: "Meta analysis for Completely Randomized Designs"
+subtitle: "National Animal Nutrition Program Meta-Analysis Workshop"
 author: "Robert J. Tempelman"
-date: "2023-06-23"
+affiliation: "Michigan State University"
+date: "2023-06-25"
 output: html_document
 ---
 
 # This document is used to highlight considerations for meta-analysis of CRD
 
+# Warning: For the contrast-based analysis, it only works for 2 treatments.  However, it should be valid for any number of treatments for the arm-based analysis.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
@@ -44,6 +47,7 @@ sigmastudy = 5  # between-study variance
 sigmastudytrt = 3  # study by trt interaction variance
   # i.e., non-zero sigmastudytrt: treatment differences may randomly differ because of differences in preparations.
 
+cat("number of cows per treatment per study",sep="\n")
 (nreps =sample(seq(40,60,2),nStudy,replace=TRUE))  # simulated different number of reps per Study varying anywhere from 40 60 in increments of 2.
 # ok typically studies are not really this big but wanting to demonstrate how to estimate heterogeneous residual variances per treatment in a joint analysis
 # (a Bayesian analysis would be far more suitable for this.)
@@ -78,7 +82,9 @@ for (Study in 1:nStudy) {
 
 overallCRDdata = bind_rows(Study_data) %>% # the entire data set
     mutate(across(!starts_with('FCM'), as.factor))
+cat("variable summary on meta-dataset",sep="\n")
 str(overallCRDdata)
+head(overallCRDdata)
 write_csv(overallCRDdata,"overallCRDdata.csv")
 
 ##########################################################################################################
@@ -88,7 +94,8 @@ write_csv(overallCRDdata,"overallCRDdata.csv")
 
 ## Analysis of raw data
 
-```{r rawdatanalysis}
+## Naive common effects analysis
+```{r fixedanalysis}
 # Analysis of raw data
 
 #IPD (Individual Performance Data)
@@ -105,11 +112,16 @@ summary(fixed_analysis)
 fixed_Trt= emmeans(fixed_analysis,"Trt")
 (fixed_effects_means = summary(fixed_Trt))
 (fixed_effects_diff = pairs(fixed_Trt))
+```
 
-# let's model study heterogeneity
+
+## mixed model analysis
+
+#### NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
+#### accounts for study heterogeneity
+
+```{r mixedanalysis}
 library(lme4)  # mixed model procedure in R.
-# NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
-# accounts for study heterogeneity
 overall_analysis = lmer(FCM~Trt+(1|Study/Trt),data=overallCRDdata)  # Fit Trt as Fixed, Study and Study*Trt as random
 summary(overall_analysis)
 lsmeansraw_Trt= emmeans(overall_analysis,"Trt")
@@ -159,8 +171,10 @@ ggplot(study_trt,aes(x=study_trt ,y=BLUP_study_trt)) + geom_point() + geom_ablin
 ```{r heteroresidual}
 library(nlme)
 # modeling heterogeneous residual variances across Studies and including random effects of Study and Treatment by Study
-##  THIS MIGHT BE CONSIDERED THE GOLD STANDARD ANALYSIS IF INDIVIDUAL COW DATA WAS READILY AVAILABLE AND RESIDUAL VARIABILITY WAS TRULY HETEROGENEOUS ACROSS STUDIES
+##  THIS MIGHT BE CONSIDERED THE REFERENCE ANALYSIS AGAINST A META-ANALYSIS ONLY USING SUMMARY STATISTICS IF INDIVIDUAL COW DATA WAS READILY AVAILABLE AND RESIDUAL VARIABILITY WAS TRULY HETEROGENEOUS ACROSS STUDIES
 ##  HOWEVER THIS MIGHT NOT TYPICALLY CONVERGE IF INDIVIDUAL STUDIES ARE "SMALL"
+### FURTHERMORE, IF OTHER VARIANCE COMPONENTS ARE TRULY HETEROGENEOUS ACROSS STUDIES, THEN THIS IS REALLY NOT THE RIGHT REFERENCE ANALYSIS
+### WOULD NEED A BAYESIAN APPROACH TO MODEL HETEROGENEOUS VARIANCE COMPONENTS ACROSS STUDIES BUT BEYOND SCOPE OF THIS WORKSHOP.
 hetero.lme <- lme(FCM ~ Trt , data=overallCRDdata, random = ~ 1|Study/Trt, weights=varIdent(form = ~ 1 | Study),method="REML")  # this will not always converge
 summary(hetero.lme)  
 lsmeansraw_Trt_hetero= emmeans(hetero.lme,"Trt")
@@ -267,6 +281,8 @@ forest(res_EE)
 
 #Mixed Effects Models
 
+## Contrast based analysis
+
 Let's look at properly modeling heterogeneity between studies.
 
 1) Mixed effects model
@@ -275,7 +291,7 @@ Let's look at properly modeling heterogeneity between studies.
 
 library(glmmTMB)
 # random effects model
-RM_1meta <- glmmTMB(estimate ~ 1 + (1|Study),  # Study really involves both Study and Study*Treatment 
+RM_1meta <- glmmTMB(estimate ~ 1 + (1|Study),  
               weights = weight,
               family = gaussian,
               REML=TRUE,
@@ -313,6 +329,11 @@ anova(FM_1meta,RM_1meta)  # this works too.
 ```
 
 ## Confidence and Prediction Intervals under the Mixed Model Analysis
+
+where confidence intervals are useful for assessing reliability of the meta-estimate for the corresponding parameter, the prediction interval indicates what is the plausible
+range of responses in future experiments.
+
+This may be more pertinent for an "extension"-based message in terms of relaying to farmers,consultants, etc. what uncertainty they may anticipate with respect to their own operations.
 ```{r CI_PI}
 # confirming the metafor CI on the effect size using the mixed model analysis.
 Studyvar = c(((VarCorr(RM_1meta))["cond"]$cond$Study))
@@ -322,7 +343,7 @@ cat("Confidence Interval",sep="\n")
 (UCL = overallest[1,"Estimate"]+ 1.96*overallest[1,"Std. Error"])
 
 # Prediction intervals
-# useful for determining uncertainty on a future experiment.
+# useful for determining uncertainty for  a future experiment.
 cat("Prediction Interval",sep="\n")
 (LPL = overallest[1,"Estimate"]- 1.96*sqrt(overallest[1,"Std. Error"]^2 + Studyvar))
 (UPL = overallest[1,"Estimate"]+ 1.96*sqrt(overallest[1,"Std. Error"]^2 + Studyvar))
