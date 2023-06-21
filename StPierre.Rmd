@@ -1,9 +1,9 @@
 ---
-title: "StPierre 2001 Example"
+title: "St-Pierre 2001 Example"
 subtitle: "National Animal Nutrition Program Meta-Analysis Workshop"
 author: "Robert J. Tempelman"
 affiliation: "Michigan State University"
-date: "June 24, 2023"
+date: "June 25, 2023"
 output: html_document
 ---
 
@@ -53,7 +53,7 @@ ggplot(Dataregs1,aes(x=X,y=Y)) + geom_point() +
   ggtitle("Figure 2A in St-Pierre (2001)")
 ```
 
-Ok...Dr. St-Pierre did not actia;;u generate this data from a simple linear regression model: $y_i = \beta_0 + \beta_1{x_i} + e_i$  but  from the following *random coefficients* model:
+Ok...Dr. St-Pierre did not actually generate this data from a simple linear regression model: $y_i = \beta_0 + \beta_1{x_i} + e_i$  but  from the following *random coefficients* model:
 
 
 
@@ -69,7 +69,7 @@ s_i  \\
 b_{i}
 \end{pmatrix}\sim N\left(\begin{pmatrix}
 0 \\
-1
+0
 \end{pmatrix},\begin{pmatrix}
 4 & 0.5\sqrt{4}\sqrt{0.04} \\
 0.5\sqrt{4}\sqrt{0.04} & 0.04
@@ -86,7 +86,7 @@ overall_regression = lm(Y~X,data=Dataregs1)
 summary(overall_regression)  
 anova(overall_regression)
 ```
-Wonderful!  We get the exact same estimates!!!  They sure seem a lot different from the "truth"!  (intercept 0 slope 1).
+Wonderful!  We get the exact same estimates as provided by St-Pierre!!!  But they sure seem a lot different from the "truth"!  (intercept 0 slope 1).
 
 THe following plot superimposes the line of best fit (blue) and intercept 0 slope 1 line (dashed) just as in Figure 4 of St-Pierre (2001)! 
 ```{r Figure4}
@@ -106,9 +106,9 @@ title("Figure 5 in St Pierre (2001)",line=-2,adj=0.2)
 
 ## Accounting for heterogeneity between studies:  Fixed effects model
 
-So let's account for the heterogeneity using the fixed effects model approach first presented by StPierre (2001) on **page 745**.
+So let's account for the heterogeneity using the fixed effects model approach first presented by St-Pierre (2001) on **page 745**.
 This is not really a great idea especially if the number of records per study is low and the distribution of Study effects is reasonably symmetric.
-Also scope of inference is then limited to these specific studies only and not to future studies (implications for prediction intervals)
+Also scope of inference is then limited to these specific studies only and not to future studies (implications for prediction intervals).
 Mixed/random effects model analysis would be much better (broad scope inference).  See later 
 
 The following reproduces much of the first page of **Figure 6** of St-Pierre (2001).  Based on corner (SAS) parameterization (zero out last level)
@@ -292,8 +292,8 @@ cat("Estimated Standard Error of Overall estimated regression coefficient",sep='
 Relative to analysis of original data, point estimate seems fine but estimated standard error is understated
 
 ## Common Effects Analysis (2)
-using mixed effects software (glmmTMB package)
-trick is to hold residual variance constant to 1 and specify weights as inverse of sampling variances
+using mixed effects software (glmmTMB package).  
+The trick is to hold residual variance constant to 1 and specify weights as inverse of sampling variances
 
 for more details on how to fix variance components in linear mixed models (glmmTMB package) in r, refer to https://stackoverflow.com/questions/75569862/linear-mixed-model-with-fix-var-component-in-r 
 
@@ -329,11 +329,11 @@ forest(res_EE)
 
 # Mixed model analysis
 
-A mixed model analysis more appropriately accounts for 
+A mixed model analysis more appropriately accounts for between study heterogeneity in the treatment effects!
 
 ## Mixed model (1)
-Random effects model using mixed models software
-trick to hold residual variance constant to 1
+Random effects model using mixed models software.
+The trick is to hold residual variance constant to 1
 
 Compare to mixed model analysis on raw data.
 
@@ -356,6 +356,18 @@ Notice that **metafor** requires the specification of sampling variances, not we
 forest(res_REML)
 ```
 
+
+
+```{r diagnostics} 
+rstudent.rma.uni(res_REML)
+### calculate influence diagnostics
+inf <- influence(res_REML)
+ 
+### plot the influence diagnostics
+plot(inf)
+dfbetas(res_REML)
+```
+
 ## Likelihood ratio test to test for importance of heterogeneity
 ```{r LRT} 
 anova(FM_1,RM_1)
@@ -372,6 +384,7 @@ Could also do the same thing for intercepts.  Let's do the mixed model analysis 
 ```{r random_intercepts} 
 (res_int_REML = rma.uni(yi=estimate,vi=sampvar,data=Dataregs_intercepts,method="REML"))  # default
 forest(res_int_REML)
+
 ```
 
 # Multivariate analysis of intercept and slope.
@@ -406,3 +419,10 @@ using metafor  (forest plot might need some work for better formatted output.)
 
 forest(res.mv)
 ```
+
+Create the regular R script from this markdown
+```{r rscript}
+knitr::purl("Latin_square.Rmd",documentation = 2)
+```
+
+
