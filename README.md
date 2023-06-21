@@ -8,7 +8,7 @@
 
 These are the meta-analysis workshop materials developed for the NANP workshop June 25, 2023
 
-The workshop slides can be found here: 
+The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Meta_analysis/blob/main/TEMPELMAN_META_ANALYSIS.pdf) 
 
 
 [CRD R program](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R)
