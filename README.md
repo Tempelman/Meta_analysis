@@ -12,7 +12,7 @@ The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Me
 
 The applications will involve three different sets of codes/outputs
 
-1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here)(https://pubmed.ncbi.nlm.nih.gov/11352149/).  
+1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found    
 
 
 [CRD R program](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R)
