@@ -19,10 +19,7 @@ The applications will involve three different sets of codes/outputs
 
 2. Analysis of simulated completely randomized designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1054063)
 
-3. Analysis of simulated Latin square designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1055615)  If time allows, this portion will also address network meta-analysis whereby both direct and indirect comparisons between two treatments are used to infer upon their mean differences using information on experiments where those treatments are not directly compared against each other.   
+3. Analysis of simulated Latin square designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/Latin_square.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/Latin_square.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1055615)  If time allows, this portion will also address network meta-analysis whereby both direct and indirect comparisons between two treatments are used to infer upon their mean differences using information on experiments where those treatments are not directly compared against each other.   
 
 
-
-
-https://rpubs.com/TEMPELMAN/StPierre 
 
