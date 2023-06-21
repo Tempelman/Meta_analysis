@@ -15,7 +15,9 @@ The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Me
 
 The applications will involve three different sets of codes/outputs
 
-1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregs2.csv) This data actually doesn't match what was actually analyzed in the paper so the actual corrected data is provided [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregscorrected.csv).  The corresponding regular R codes and R markdown codes are also provided.  I would suggest that you either run either the provided regular R codes and R markdown codes or just simply sit back and relax using the R markdown output provided.      
+1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregs2.csv) This data actually doesn't match what was actually analyzed in the paper so the actual corrected data is provided [here].(https://github.com/Tempelman/Meta_analysis/blob/main/Dataregscorrected.csv).  The corresponding [regular R codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.R) and [R markdown codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.Rmd) are also provided.  I would suggest that you either run either the provided regular R codes and R markdown codes (the latter might be preferable) or just simply sit back and relax using the [R markdown file](https://rpubs.com/TEMPELMAN/1051562) provided.
+
+2. Analysis of simulated completely randomized designs. The corresponding regular R codes are provided as a regular script or a markdown script      
 
 
 [CRD R program](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R)
