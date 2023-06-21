@@ -13,6 +13,10 @@ These are the meta-analysis workshop materials developed for the NANP workshop J
 
 The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Meta_analysis/blob/main/TEMPELMAN_META_ANALYSIS.pdf) 
 
+R and R studio will be used for this workshop.  R can be installed from https://cran.r-project.org/ whereas R studio can be installed from https://posit.co/download/rstudio-desktop/ .  Once you've installed R, be sure to install various packages in the following manner:
+
+<span style="font-family:courier; font-size:4em;">install.packages(c('tidyverse', 'ggplot2', 'multcomp','car', 'emmeans', 'broom','glmmTMB', 'metafor' ))</span>
+
 The applications will involve three different sets of codes/outputs
 
 1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregs2.csv) This data actually doesn't match what was actually analyzed in the paper so the actual corrected data is provided [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregscorrected.csv).  The corresponding [regular R codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.R) and [R markdown codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.Rmd) are also provided.  I would suggest that you either run either the provided regular R codes and R markdown codes (the latter might be preferable) or just simply sit back and relax using the [R markdown file](https://rpubs.com/TEMPELMAN/1051562) provided.  You may need to be mindful of the directory name where you stored the input data on your laptop/PC.
