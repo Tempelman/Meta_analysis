@@ -25,5 +25,5 @@ The applications will involve three different sets of codes/outputs
 
 3. Analysis of simulated Latin square designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/Latin_square.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/Latin_square.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1055615)  If time allows, this portion will also address network meta-analysis whereby both direct and indirect comparisons between two treatments are used to infer upon their mean differences using information on experiments where those treatments are not directly compared against each other.   
 
-
+Some of you (as am I) are heavy SAS users.  The SAS mixed model procedures are particularly flexible for meta-analysis with some excellent expositions and SAS code provided by [Madden et al. (2016)](https://pubmed.ncbi.nlm.nih.gov/27111798/), [Piepho et al. (2014)](https://pubmed.ncbi.nlm.nih.gov/25410043/) and [Piepho and Madden (2022)](https://pubmed.ncbi.nlm.nih.gov/35638104/)  
 
