@@ -15,13 +15,14 @@ The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Me
 
 The applications will involve three different sets of codes/outputs
 
-1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregs2.csv) This data actually doesn't match what was actually analyzed in the paper so the actual corrected data is provided [here].(https://github.com/Tempelman/Meta_analysis/blob/main/Dataregscorrected.csv).  The corresponding [regular R codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.R) and [R markdown codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.Rmd) are also provided.  I would suggest that you either run either the provided regular R codes and R markdown codes (the latter might be preferable) or just simply sit back and relax using the [R markdown file](https://rpubs.com/TEMPELMAN/1051562) provided.
+1. Analysis of St-Pierre (2001) data.  Open access to the corresponding publication can be found [here](https://pubmed.ncbi.nlm.nih.gov/11352149/).  The corresponding data in the Appendix can be found [here](https://github.com/Tempelman/Meta_analysis/blob/main/Dataregs2.csv) This data actually doesn't match what was actually analyzed in the paper so the actual corrected data is provided [here].(https://github.com/Tempelman/Meta_analysis/blob/main/Dataregscorrected.csv).  The corresponding [regular R codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.R) and [R markdown codes](https://github.com/Tempelman/Meta_analysis/blob/main/StPierre.Rmd) are also provided.  I would suggest that you either run either the provided regular R codes and R markdown codes (the latter might be preferable) or just simply sit back and relax using the [R markdown file](https://rpubs.com/TEMPELMAN/1051562) provided.  You may need to be mindful of the directory name where you stored the input data on your laptop/PC.
 
-2. Analysis of simulated completely randomized designs. The corresponding regular R codes are provided as a regular script or a markdown script      
+2. Analysis of simulated completely randomized designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1054063)
+
+3. Analysis of simulated Latin square designs. The corresponding regular R codes are provided as a [regular script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R) or a [markdown script](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.Rmd).  Or again, you could just sit and back and watch from [here](https://rpubs.com/TEMPELMAN/1055615)  If time allows, this portion will also address network meta-analysis whereby both direct and indirect comparisons between two treatments are used to infer upon their mean differences using information on experiments where those treatments are not directly compared against each other.   
 
 
-[CRD R program](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R)
-[CRD_study.R](https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R)https://github.com/Tempelman/Meta_analysis/blob/main/CRD_study.R 
+
 
 https://rpubs.com/TEMPELMAN/StPierre 
 
