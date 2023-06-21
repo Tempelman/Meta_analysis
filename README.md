@@ -1,8 +1,8 @@
-<p style="text-align: center;">Meta Analysis Workshop </p>
-<p style="text-align: center;">National Animal Nutrition Program Workshop </p>
-<p style="text-align: center;">2023 Dairy Science Meetings </p>
-<p style="text-align: center;">June 25, 2023 </p>
-<p style="text-align: center;">Ottawa, Canada </p>
+<h3 style="text-align: center;">Meta Analysis Workshop </h3>
+<h3 style="text-align: center;">National Animal Nutrition Program Workshop </h3>
+<h3 style="text-align: center;">2023 Dairy Science Meetings </h3>
+<h3 style="text-align: center;">June 25, 2023 </h3>
+<h3 style="text-align: center;">Ottawa, Canada </h3>
 
 These are the meta-analysis workshop materials developed for the NANP workshop June 25, 2023
 
