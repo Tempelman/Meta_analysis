@@ -15,7 +15,7 @@ The workshop slides can be found here:  [Slides](https://github.com/Tempelman/Me
 
 R and R studio will be used for this workshop.  R can be installed from https://cran.r-project.org/ whereas R studio can be installed from https://posit.co/download/rstudio-desktop/ .  Once you've installed R, be sure to install various packages in the following manner:
 
-<span style="font-family:courier; font-size:4em;">install.packages(c('tidyverse', 'ggplot2', 'multcomp','car', 'emmeans', 'broom','glmmTMB', 'metafor' ))</span>
+**<span style="font-family:courier; font-size:4em;">install.packages(c('tidyverse', 'ggplot2', 'multcomp','car', 'emmeans', 'broom','glmmTMB', 'metafor' ))</span>**
 
 The applications will involve three different sets of codes/outputs
 
