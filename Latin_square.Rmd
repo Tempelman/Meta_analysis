@@ -1,7 +1,9 @@
 ---
 title: "Meta analysis for Latin Square Designs"
+subtitle: "National Animal Nutrition Program Meta-Analysis Workshop"
 author: "Robert J. Tempelman"
-date: "2023-06-23"
+affiliation: "Michigan State University"
+date: "2023-06-25"
 output: html_document
 ---
 
@@ -101,6 +103,7 @@ study_trt = data.frame(Study_Trtlabels,study_trt)
 ```{r IPD}
 library(lme4)  # mixed model procedure in R.
 # NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
+## of course, we really never know the true model!
 overallcrossover_analysis = lmer(FCM~Trt+ (1|Period:Study) + (1|Cow:Study) + (1|Study/Trt),data=overallcrossoverdata)  # Fit Trt as Fixed, Study and Study*Trt as random
 # Cows and Periods are nested within Study.  If Period represents a physiological stage (i.e. all cows start at roughly the same DIM), then treat as fixed.
 # Might also fit Treatment by Period then as well.
@@ -290,7 +293,7 @@ effectsize_IPD
 
 ```{r}
 
-RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),  
+RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),   # models the effect of study and study*contrast
                  weights = weight,
                  family = gaussian,
                  REML=TRUE,
@@ -300,12 +303,12 @@ RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),
 )
 summary(RM_mvcontrast)
 
-# compare with analyses on individual data
+# compare with analyses on individual data.  Almost matches perfectly!!
 effectsize_IPD
 
 ```
 
-# Analysis based on Study specific means
+# Analysis based on Study specific means (Arm based analysis)
 (instead of contrasts)
 
 ```{r Studyspecmeans}
@@ -407,8 +410,10 @@ lsmeans_Trt_mv2arm= emmeans(RM_mv2arm,"Trt")
 ( summary(lsmeans_Trt_mv2arm))
 pairs(lsmeans_Trt_mv2arm)
 ```
-# # A network meta-analysis
-# use same specifications as above:
+## A network meta-analysis
+ 
+Use same simulated datasets as above but this time just randomly choose two of three treatments from each study  
+
 ```{r}
 trtchoose = vector(mode="list",length= nStudy)  # 
 
@@ -475,7 +480,9 @@ RM_1_IB <- glmmTMB(estimate ~ 1 + (1|Study),
                 map = list(betad = factor(NA))
 )
 summary(RM_1_IB) 
+## compare with analysis from using raw data
 
+effectsize_IB
 ```
 # can also use study-specific means to do this
 
@@ -511,6 +518,8 @@ summary(RM_arm_IB)
 lsmeans_Trt_RM_arm_IB= emmeans(RM_arm_IB,"Trt")
 ( summary(lsmeans_Trt_RM_arm_IB))
 pairs(lsmeans_Trt_RM_arm_IB)
+
+# compare with analyses using raw data
 effectsize_IB
 
 

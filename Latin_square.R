@@ -1,14 +1,16 @@
 #' ---
 #' title: "Meta analysis for Latin Square Designs"
+#' subtitle: "National Animal Nutrition Program Meta-Analysis Workshop"
 #' author: "Robert J. Tempelman"
-#' date: "2023-06-23"
+#' affiliation: "Michigan State University"
+#' date: "2023-06-25"
 #' output: html_document
 #' ---
 #' 
 #' # This document is used to highlight considerations for meta-analysis of Latin square/crossover designs
 #' 
 #' 
-## ----setup, include=FALSE------------------------------------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
 library(tidyverse,ggplot2)
@@ -19,7 +21,7 @@ library(tidyverse,ggplot2)
 #' 
 #' Simulate a n_trt treatment Latin square design from a number of different studies
 #' 
-## ----Simulate------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Simulate--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ##### THE FOLLOWING JUST SIMULATES SOME DATA BASED ON THE FOLLOWING SPECIFICATIONS   #####
 ##########################################################################################################
 ######################## BEGINNING OF SIMULATION #########################################################
@@ -98,9 +100,10 @@ study_trt = data.frame(Study_Trtlabels,study_trt)
 #' 
 #' # Analysis based on individual cow records across experiments
 #' 
-## ----IPD-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----IPD-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 library(lme4)  # mixed model procedure in R.
 # NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
+## of course, we really never know the true model!
 overallcrossover_analysis = lmer(FCM~Trt+ (1|Period:Study) + (1|Cow:Study) + (1|Study/Trt),data=overallcrossoverdata)  # Fit Trt as Fixed, Study and Study*Trt as random
 # Cows and Periods are nested within Study.  If Period represents a physiological stage (i.e. all cows start at roughly the same DIM), then treat as fixed.
 # Might also fit Treatment by Period then as well.
@@ -120,7 +123,7 @@ lsmeans_Trt= emmeans(overallcrossover_analysis,"Trt")
 #' 
 #' The following is just for quality control checks
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## THE FOLLOWING IS NOT REALLY IMPORTANT...JUST A QUALITY CONTROL CHECK
 ##Plot Estimated(Predicted) Study Effects versus True Study Effects
@@ -153,7 +156,7 @@ ggplot(study_trt,aes(x=study_trt ,y=BLUP_study_trt)) + geom_point() + geom_ablin
 #' 
 #' Write a few functions that will help compute the study-specific statistics.
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Let's conduct a separate mixed model analysis for each Study
 # just like what we would anticipate for a meta-analysis
 # Need to write some functions in order to do so
@@ -193,7 +196,7 @@ varcomps = function(model){
 
 #' 
 #' This is what it looks like for one study
-## ----Study1--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Study1----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study1_analysis = lmer(FCM~Trt+Period+(1|Cow),data=filter(overallcrossoverdata,Study==1))
 joint_tests(Study1_analysis)
 summary(Study1_analysis)
@@ -204,7 +207,7 @@ contrast(Study1_analysis)
 
 #' 
 #' 
-## ----Study_spec_contrasts------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Study_spec_contrasts--------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Let's save the contrasts (i.e. pairwise comparisons) from each study
 Study_specific_contrasts = overallcrossoverdata %>%
   group_by(Study) %>%
@@ -224,7 +227,7 @@ head(Study_specific_contrasts)
 #' 
 #' We'll consider the common effects 
 #' 
-## ----CommonAvsB----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----CommonAvsB------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 (AB_contrast = filter(Study_specific_contrasts,contrast=="A - B"))
 # The following analysis is rather common (and typically wrong!!!)
@@ -263,7 +266,7 @@ library(metafor)
 forest(res_EE_AvsB)
 
 #' 
-## ----MixedAvB------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----MixedAvB--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # an analysis that properly reflects heterogeneity between studies.
 library(glmmTMB)
 # random effects model
@@ -288,9 +291,9 @@ effectsize_IPD
 #' 
 #' # Multivariate analysis using all contrast information
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),  
+RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),   # models the effect of study and study*contrast
                  weights = weight,
                  family = gaussian,
                  REML=TRUE,
@@ -300,15 +303,15 @@ RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),
 )
 summary(RM_mvcontrast)
 
-# compare with analyses on individual data
+# compare with analyses on individual data.  Almost matches perfectly!!
 effectsize_IPD
 
 
 #' 
-#' # Analysis based on Study specific means
+#' # Analysis based on Study specific means (Arm based analysis)
 #' (instead of contrasts)
 #' 
-## ----Studyspecmeans------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Studyspecmeans--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #lets save the study specific means
 
 Study_specific_means = overallcrossoverdata %>%
@@ -326,7 +329,7 @@ Study_specific_means = overallcrossoverdata %>%
 head(Study_specific_means)
 
 #' 
-## ----subopt--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----subopt----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Let's use the suboptimal weights anyways
 
 RM_mv_subopt <- glmmTMB(emmean ~ Trt   + (1|Study/Trt),  # 
@@ -348,7 +351,7 @@ effectsize_IPD
 #' 
 #' # Let's look at study-specific variance components
 #' 
-## ----Study_specific_var--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Study_specific_var----------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_var = overallcrossoverdata %>%
   group_by(Study) %>%
   nest() %>%
@@ -360,7 +363,7 @@ Study_specific_var = overallcrossoverdata %>%
 boxplot(Study_specific_var[,-1] )
 
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Let's look at the relationship between SEM, SED, and the variance components
 
 
@@ -381,14 +384,14 @@ SE_compare =  Study_specific_means %>%
 head(SE_compare)
 
 #' 
-## ----weight_comparison---------------------------------------------------------------------------------------------------------------------------------------------------
+## ----weight_comparison-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ggplot(SE_compare, aes(x=weight_old, y=weight_altered)) + 
   geom_point() 
 
 
 #' 
 #' 
-## ----Means_analysis------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Means_analysis--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_means2= Study_specific_means%>%
   mutate(SEM_altered = SE/sqrt(2)) %>%
   mutate(weight_altered = (1/SEM_altered)^2) %>%  # What i use in the mixed model
@@ -407,9 +410,11 @@ lsmeans_Trt_mv2arm= emmeans(RM_mv2arm,"Trt")
 ( summary(lsmeans_Trt_mv2arm))
 pairs(lsmeans_Trt_mv2arm)
 
-#' # # A network meta-analysis
-#' # use same specifications as above:
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#' ## A network meta-analysis
+#'  
+#' Use same simulated datasets as above but this time just randomly choose two of three treatments from each study  
+#' 
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 trtchoose = vector(mode="list",length= nStudy)  # 
 
 for (Study in 1:nStudy) {
@@ -430,7 +435,7 @@ IB_Data = IB_design %>%
 
 #' 
 #' ## analysis of IB data
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
 IB_analysis = lmer(FCM~Trt+ (1|Period:Study) + (1|Cow:Study) + (1|Study/Trt),data=IB_Data)  # Fit Trt as Fixed, Study and Study*Trt as random
@@ -445,7 +450,7 @@ lsmeans_TrtIB= emmeans(IB_analysis,"Trt")
 
 #' # Study specific contrasts
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_contrasts_IB = IB_Data %>%
   group_by(Study) %>%
   nest() %>%
@@ -462,7 +467,7 @@ Study_specific_contrasts_IB = IB_Data %>%
 #' # Naively only considering studies with A-B contrasts
 #' 
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_contrasts_IB_AB = filter(Study_specific_contrasts_IB,contrast == 'A - B')
  
  # random effects model
@@ -475,11 +480,13 @@ RM_1_IB <- glmmTMB(estimate ~ 1 + (1|Study),
                 map = list(betad = factor(NA))
 )
 summary(RM_1_IB) 
+## compare with analysis from using raw data
 
+effectsize_IB
 
 #' # can also use study-specific means to do this
 #' 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_means_IB = IB_Data %>%
   group_by(Study) %>%
   nest() %>%
@@ -511,6 +518,8 @@ summary(RM_arm_IB)
 lsmeans_Trt_RM_arm_IB= emmeans(RM_arm_IB,"Trt")
 ( summary(lsmeans_Trt_RM_arm_IB))
 pairs(lsmeans_Trt_RM_arm_IB)
+
+# compare with analyses using raw data
 effectsize_IB
 
 
