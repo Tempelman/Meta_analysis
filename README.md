@@ -1,5 +1,10 @@
 # Meta_analysis
-Meta_analysis workshop materials
+# Robert J. Tempelman
+# Department of Animal Science
+# Michigan State University
+
+
+These are the meta-analysis workshop materials developed for the NANP workshop June 25, 2023
 
 Workshop materials for Meta-Analysis workshop at NANP workshop June 25, 2023
 
