@@ -7,7 +7,7 @@
 #' output: html_document
 #' ---
 #' 
-## ----setup, include=FALSE-----------------------------------------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE---------------------------------------------------------------------------------------------------------
 rm(list=ls())  # always a good idea to clean-up the directory
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/StPierre")
 library(tidyverse,ggplot)
@@ -23,7 +23,7 @@ library(tidyverse,ggplot)
 #' 
 #' The following is the original data as provided in the Appendix from St-Pierre (2001)... The first few observations are also printed with the head() function.  Let's double-check the data against the Appendix
 #' 
-## ----origdata-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----origdata---------------------------------------------------------------------------------------------------------------------
 getwd()
 Dataregs2 = read_csv("Dataregs2.csv")  # Data provided in Appendix of St-Pierre (2001)
 str(Dataregs2)
@@ -33,7 +33,7 @@ head(Dataregs2)
 #' How about a scatterplot of the data?...well it should really look like what's given in Figure 2a of St-Pierre (2001).
 #' ..but it doesn't: 
 #' 
-## ----origplot-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----origplot---------------------------------------------------------------------------------------------------------------------
 ggplot(Dataregs2,aes(x=X,y=Y)) + geom_point() +
   scale_x_continuous(breaks=seq(0,12,2)) + scale_y_continuous(breaks=seq(-4,20,2))
 
@@ -41,13 +41,13 @@ ggplot(Dataregs2,aes(x=X,y=Y)) + geom_point() +
 #' Corrected data was kindly provided by Dr. White as forwarded from Dr. St-Pierre.  
 #' 
 #' 
-## ----reviseddata--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----reviseddata------------------------------------------------------------------------------------------------------------------
 Dataregs1 = read_csv("Dataregscorrected.csv")  # Revised data
 head(Dataregs1)
 
 #' such that the revised corrected scatterplot looks as follows (and precisely what is provided in Figure 2A in St Pierre 2001):
 #' 
-## ----revplot------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----revplot----------------------------------------------------------------------------------------------------------------------
 ggplot(Dataregs1,aes(x=X,y=Y)) + geom_point() +
   scale_x_continuous(breaks=seq(0,12,2)) + scale_y_continuous(breaks=seq(-4,20,2)) + 
   ggtitle("Figure 2A in St-Pierre (2001)")
@@ -81,7 +81,7 @@ ggplot(Dataregs1,aes(x=X,y=Y)) + geom_point() +
 #' Let's fit an overall regression model that ignores the study-specific heterogeneity and fit a simple linear regression model: $y_i = \beta_0 + \beta_1{x_i} + e_i$.  In other words, we'll generate the same results as **Figure 3** in St-Pierre (2001) who used SAS.
 #' 
 #' 
-## ----Figure3------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure3----------------------------------------------------------------------------------------------------------------------
 overall_regression = lm(Y~X,data=Dataregs1)
 summary(overall_regression)  
 anova(overall_regression)
@@ -89,7 +89,7 @@ anova(overall_regression)
 #' Wonderful!  We get the exact same estimates as provided by St-Pierre!!!  But they sure seem a lot different from the "truth"!  (intercept 0 slope 1).
 #' 
 #' THe following plot superimposes the line of best fit (blue) and intercept 0 slope 1 line (dashed) just as in Figure 4 of St-Pierre (2001)! 
-## ----Figure4------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure4----------------------------------------------------------------------------------------------------------------------
 ggplot(Dataregs1, aes(x=X, y=Y)) + 
   geom_point()+
   geom_smooth(method=lm, se=FALSE) + 
@@ -99,7 +99,7 @@ ggplot(Dataregs1, aes(x=X, y=Y)) +
 #' 
 #' Let's also reproduce the residual plot (Figure 5 in St-Pierre, 2001)
 #' 
-## ----Figure5------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure5----------------------------------------------------------------------------------------------------------------------
 plot(overall_regression,which=1)
 title("Figure 5 in St Pierre (2001)",line=-2,adj=0.2)
 
@@ -113,7 +113,7 @@ title("Figure 5 in St Pierre (2001)",line=-2,adj=0.2)
 #' 
 #' The following reproduces much of the first page of **Figure 6** of St-Pierre (2001).  Based on corner (SAS) parameterization (zero out last level)
 #' 
-## ----Figure6page1-------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure6page1-----------------------------------------------------------------------------------------------------------------
 Dataregs1$Study = factor(Dataregs1$Study)  # make sure Study is considered to be a factor (Study was numbered)
 contrasts(Dataregs1$Study) <-contr.SAS(nlevels(Dataregs1$Study))  # use the SAS parameterization for comparison with StPierre
 fixed_model = lm(Y~X+Study+X:Study,data=Dataregs1)   
@@ -122,7 +122,7 @@ summary(fixed_model)  # reproduce the estimates provided on first page of Figure
 #' 
 #' The following produces the least squares means for Study also provided at the **top of page 747** of St-Pierre (2001)
 #' 
-## ----Page 747top--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Page 747top------------------------------------------------------------------------------------------------------------------
 library(emmeans)
 lsmeans_study= emmeans(fixed_model,"Study")
 xgrid<-ref_grid(fixed_model,at=list(X=0))  # define the Study lsmeans at X = 0.
@@ -130,7 +130,7 @@ summary(xgrid)
 
 #' The following is used to generate the study specific slopes provided at the **bottom of page 747** of St-Pierre (2001).
 #' 
-## ----Page 747bottom-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Page 747bottom---------------------------------------------------------------------------------------------------------------
 #Study specific slopes provided at bottom of page 747
 library(multcomp)
 # following reproduces the contrasts for the Study specific slopes in Equation [6] from St-Pierre
@@ -147,7 +147,7 @@ summary(Slopes)
 #' 
 #' The following prints the overall intercept reported near the **bottom of Figure 6 (page 1747)**
 #' 
-## ----Page 747overallint-------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Page 747overallint-----------------------------------------------------------------------------------------------------------
 Overall_int_contrast = matrix(rep(0,1*40),nrow=1)
 Overall_int_contrast[1,1] = 1
 Overall_int_contrast[1,3:21]=0.05
@@ -159,7 +159,7 @@ summary(Overall_int)
 
 #' Finally....the ANOVA table as also provided at the **top of page 746** of St-Pierre (2001)
 #' 
-## ----ANOVAfixed---------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----ANOVAfixed-------------------------------------------------------------------------------------------------------------------
 library(car)
 contrasts(Dataregs1$Study) <-contr.sum(nlevels(Dataregs1$Study)) # Type 3 ANOVA involving interactions with covariates only works well with contr.sum
 fixed_model = lm(Y~X+Study+X:Study,data=Dataregs1)  # rerun same model again
@@ -176,7 +176,7 @@ lsmeans_study= emmeans(fixed_model,"Study")  # doesn't change the least squares 
 #' 
 #' The following reproduces much of **Figure 7**
 #' 
-## ----Figure7------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure7----------------------------------------------------------------------------------------------------------------------
 library(lme4)
 mixed_model = lmer(Y~X+(1+X|Study),data=Dataregs1)
 anova(mixed_model)
@@ -188,7 +188,7 @@ coef(mixed_model)  # these don't look like the bottom of page 750 or top of page
 
 #' 
 #' The residual plot
-## ----mixed_residplot----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----mixed_residplot--------------------------------------------------------------------------------------------------------------
  plot(mixed_model,which=1,main = "Residual plot for Mixed Effects Model")
 
 #' 
@@ -196,7 +196,7 @@ coef(mixed_model)  # these don't look like the bottom of page 750 or top of page
 #' 
 #' Study random effects for intercept and slope expressed as a difference from the mean
 #' 
-## ----Figure7bottom------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure7bottom----------------------------------------------------------------------------------------------------------------
 Study_specific_int = coef(mixed_model)$Study["(Intercept)"]-mean(coef(mixed_model)$Study["(Intercept)"][,1])
 Study_specific_slope = coef(mixed_model)$Study["X"]-mean(coef(mixed_model)$Study["X"][,1])
 data.frame(Study_specific_int,Study_specific_slope)
@@ -204,7 +204,7 @@ data.frame(Study_specific_int,Study_specific_slope)
 #' 
 #' 
 #' **Figure 10 from St-Pierre (2001)**
-## ----Figure10-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Figure10---------------------------------------------------------------------------------------------------------------------
 Xmat = cbind(1,Dataregs1$X)
 parmest = coef(summary(mixed_model))[,'Estimate']
 y_adj=Xmat%*%parmest+resid(mixed_model)
@@ -224,7 +224,7 @@ ggplot(data_adj,aes(x=X,y=Y_adj)) + geom_point() +
 #' 
 #' first need to write a function for this.
 #' 
-## ----separate-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----separate---------------------------------------------------------------------------------------------------------------------
 linear_model = function(df) {
   lm(Y~X,data=df)
 }
@@ -247,7 +247,7 @@ data.frame(Dataregs1_analysis)
 #' 
 #' Let's do the random coefficients mixed model analysis again on the original raw data but without those studies
 #' 
-## ----redomixed----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----redomixed--------------------------------------------------------------------------------------------------------------------
 Dataregs1a = Dataregs1 %>%
    filter(!Study %in% c('E', 'T')) %>% 
    droplevels()
@@ -257,7 +257,7 @@ summary(mixed_model)
 #'  
 #' Meta-analyses software typically requires either determination of the weights (inverse squared standard errors) or sampling variances (squared standard errors) 
 #'  
-## ----addweights---------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----addweights-------------------------------------------------------------------------------------------------------------------
  Dataregs1_analysis = Dataregs1_analysis %>%
   na.omit() %>%
   mutate(weight = (1/std.error^2)) %>%
@@ -281,7 +281,7 @@ summary(mixed_model)
 #' 
 #' 
 #'  
-## ----commoneffects------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----commoneffects----------------------------------------------------------------------------------------------------------------
 
 # COMMON EFFECTS MODEL
 cat("Overall estimated regression coefficient",sep='\n')
@@ -300,9 +300,9 @@ cat("Estimated Standard Error of Overall estimated regression coefficient",sep='
 #' It is really MUCH more easier to do this sort of thing in SAS.   See https://pubmed.ncbi.nlm.nih.gov/27111798/  and https://link.springer.com/article/10.1186/1471-2288-14-61 
 #' 
 #' 
-## ----commoneffects2-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----commoneffects2---------------------------------------------------------------------------------------------------------------
 library(glmmTMB)
-FM_1 <- glmmTMB(estimate ~ 1 ,  
+CE_1 <- glmmTMB(estimate ~ 1 ,  
                 weights = weight,
                 family = gaussian,
                 REML=TRUE,
@@ -310,12 +310,12 @@ FM_1 <- glmmTMB(estimate ~ 1 ,
                 start = list(betad = log(1)),  # fix residual variance = 1
                 map = list(betad = factor(NA))
 )
-summary(FM_1)
+summary(CE_1)
 
 #' ## Common Effects Analysis (3)
 #'  using the R package metafor https://wviechtb.github.io/metafor/ 
 #'  
-## ----commoneffects3-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----commoneffects3---------------------------------------------------------------------------------------------------------------
 library(metafor)
 (res_EE = rma.uni(yi=estimate ,vi=sampvar,data=Dataregs_slopes,method="EE")) 
 
@@ -323,7 +323,7 @@ library(metafor)
 #' 
 #' great way to visualize undercertainty of individual studies along with meta-estimate and meta-CI
 #' 
-## ----forestcommon-------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----forestcommon-----------------------------------------------------------------------------------------------------------------
 forest(res_EE)
 
 #' 
@@ -337,7 +337,7 @@ forest(res_EE)
 #' 
 #' Compare to mixed model analysis on raw data.
 #' 
-## ----randomeffects1-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----randomeffects1---------------------------------------------------------------------------------------------------------------
 RM_1 <- glmmTMB(estimate ~ 1 + (1|Study),   
                 weights = weight,
                 family = gaussian,
@@ -351,14 +351,14 @@ summary(RM_1)
 #' ## Mixed model (2)
 #' Heterogeneous effects model using **metafor**.
 #' Notice that **metafor** requires the specification of sampling variances, not weights (just inverses of each other)
-## ----randomeffects2-----------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----randomeffects2---------------------------------------------------------------------------------------------------------------
 (res_REML = rma.uni(yi=estimate,vi=sampvar,data=Dataregs_slopes,method="REML"))  # default
 forest(res_REML)
 
 #' 
 #' 
 #' 
-## ----diagnostics--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----diagnostics------------------------------------------------------------------------------------------------------------------
 rstudent.rma.uni(res_REML)
 ### calculate influence diagnostics
 inf <- influence(res_REML)
@@ -369,8 +369,8 @@ dfbetas(res_REML)
 
 #' 
 #' ## Likelihood ratio test to test for importance of heterogeneity
-## ----LRT----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-anova(FM_1,RM_1)
+## ----LRT--------------------------------------------------------------------------------------------------------------------------
+anova(CE_1,RM_1)
 
 # this works too:
 
@@ -381,11 +381,28 @@ anova(res_EE,res_REML)
 #' 
 #' Could also do the same thing for intercepts.  Let's do the mixed model analysis there.
 #' 
-## ----random_intercepts--------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----random_intercepts------------------------------------------------------------------------------------------------------------
 (res_int_REML = rma.uni(yi=estimate,vi=sampvar,data=Dataregs_intercepts,method="REML"))  # default
 forest(res_int_REML)
 
 
+#' 
+#' # Suppose you didn't use the "trick" (just decided to try to estimate a residual variance)
+#' 
+## ----CE_forgottofix---------------------------------------------------------------------------------------------------------------
+CE_1forgot <- glmmTMB(estimate ~ 1 ,   
+                weights = weight,
+                family = gaussian,
+                REML=TRUE,
+                data = Dataregs_slopes
+)
+summary(CE_1forgot)
+
+
+#' 
+#' Wow you would badly understate the uncertainty.
+#' 
+#' The mixed effects model accounting for Study heterogeneity (adding (1|Study)) would not even run if you tried to estimate the residual variance (get an error message)
 #' 
 #' # Multivariate analysis of intercept and slope.
 #' 
@@ -396,7 +413,7 @@ forest(res_int_REML)
 #' ## Multivariate mixed model (1)
 #' using glmmTMB (mixed model analysis)
 #' 
-## ----mv1----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----mv1--------------------------------------------------------------------------------------------------------------------------
 RMM_1 <- glmmTMB(estimate ~ term + (term-1|Study),   
                 weights = weight,
                 family = gaussian,
@@ -414,15 +431,8 @@ summary(lsmeans_RMM_1)
 #' 
 #' ## Multivariate mixed model (2)
 #' using metafor  (forest plot might need some work for better formatted output.)
-## ----mv2----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----mv2--------------------------------------------------------------------------------------------------------------------------
 (res.mv <- rma.mv(estimate, sampvar, mods = ~ term -1, random = ~ term | Study, struct="UN", data=Dataregs1_analysis))
 
 forest(res.mv)
 
-#' 
-#' Create the regular R script from this markdown
-## ----rscript------------------------------------------------------------------------------------------------------------------------------------------------------------------
-knitr::purl("Latin_square.Rmd",documentation = 2)
-
-#' 
-#' 

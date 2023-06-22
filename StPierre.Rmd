@@ -302,7 +302,7 @@ It is really MUCH more easier to do this sort of thing in SAS.   See https://pub
 
 ```{r commoneffects2} 
 library(glmmTMB)
-FM_1 <- glmmTMB(estimate ~ 1 ,  
+CE_1 <- glmmTMB(estimate ~ 1 ,  
                 weights = weight,
                 family = gaussian,
                 REML=TRUE,
@@ -310,7 +310,7 @@ FM_1 <- glmmTMB(estimate ~ 1 ,
                 start = list(betad = log(1)),  # fix residual variance = 1
                 map = list(betad = factor(NA))
 )
-summary(FM_1)
+summary(CE_1)
 ```
 ## Common Effects Analysis (3)
  using the R package metafor https://wviechtb.github.io/metafor/ 
@@ -370,7 +370,7 @@ dfbetas(res_REML)
 
 ## Likelihood ratio test to test for importance of heterogeneity
 ```{r LRT} 
-anova(FM_1,RM_1)
+anova(CE_1,RM_1)
 
 # this works too:
 
@@ -386,6 +386,23 @@ Could also do the same thing for intercepts.  Let's do the mixed model analysis 
 forest(res_int_REML)
 
 ```
+
+# Suppose you didn't use the "trick" (just decided to try to estimate a residual variance)
+
+```{r CE_forgottofix} 
+CE_1forgot <- glmmTMB(estimate ~ 1 ,   
+                weights = weight,
+                family = gaussian,
+                REML=TRUE,
+                data = Dataregs_slopes
+)
+summary(CE_1forgot)
+
+```
+
+Wow you would badly understate the uncertainty.
+
+The mixed effects model accounting for Study heterogeneity (adding (1|Study)) would not even run if you tried to estimate the residual variance (get an error message)
 
 # Multivariate analysis of intercept and slope.
 
@@ -419,10 +436,3 @@ using metafor  (forest plot might need some work for better formatted output.)
 
 forest(res.mv)
 ```
-
-Create the regular R script from this markdown
-```{r rscript}
-knitr::purl("Latin_square.Rmd",documentation = 2)
-```
-
-
