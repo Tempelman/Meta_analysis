@@ -10,32 +10,35 @@
 #' # This document is used to highlight considerations for meta-analysis of CRD
 #' 
 #' # Warning: For the contrast-based analysis, it only works for 2 treatments.  However, it should be valid for any number of treatments for the arm-based analysis.
+#' For further reference on contrast-based analysis for 3 or more treatments, refer to the Latin square code.
 #' 
-## ----setup, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
 library(tidyverse,ggplot2)
 rm(list=ls())
+set.seed(50)  # set seed for reproducibility.
+heterorun = TRUE  # you could set this to FALSE for smaller studies.
+nStudy = 25  # Number of studies
+ntrt = 2     # Number of treatments 
+(nreps =sample(seq(40,60,2),nStudy,replace=TRUE)) 
 # set default directory
 
 #' 
 #' ## Simulation
 #' 
-#' Simulate a n_trt treatment completely randomized design data from a number of different studies
+#' Simulate a $n_{trt}$ = `r ntrt`  treatment completely randomized design data from `r nStudy` different studies with
+#' sample sizes ranging from `r min(nreps)` to `r max(nreps)` cows
 #' 
-## ----Simulate--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Simulate--------------------------------------------------------------------------------------------------------------------------------------------------------
+getwd()  # Let's make sure you're in the right directory
 ##### THE FOLLOWING JUST SIMULATES SOME DATA BASED ON THE FOLLOWING SPECIFICATIONS   #####
 ##########################################################################################################
 ######################## BEGINNING OF SIMULATION #########################################################
 ##########################################################################################################
-set.seed(50)  # set seed for reproducibility.
+
 # we should all simulate exactly the same data if we use the same seed!!!
 
 # Let's data from a number (nStudy) of studies, each being a completely randomized design involving two treatments.
-
-setwd("C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
-
-nStudy = 25  # Number of studies
-ntrt = 2     # Number of treatments 
 
 #We'll set the variance components 
 
@@ -48,9 +51,9 @@ sigmastudytrt = 3  # study by trt interaction variance
   # i.e., non-zero sigmastudytrt: treatment differences may randomly differ because of differences in preparations.
 
 cat("number of cows per treatment per study",sep="\n")
-(nreps =sample(seq(40,60,2),nStudy,replace=TRUE))  # simulated different number of reps per Study varying anywhere from 40 60 in increments of 2.
+ # simulated different number of reps per Study varying anywhere from 40 60 in increments of 2.
 # ok typically studies are not really this big but wanting to demonstrate how to estimate heterogeneous residual variances per treatment in a joint analysis
-# (a Bayesian analysis would be far more suitable for this.)
+# (a Bayesian analysis would be far more suitable for this.).  Otherwise, we can delete that code.
 overallmean = 40
 trteffects = seq(-1,+1,length.out=ntrt)  # treatment effects relative to overall mean
 (trtlabels = toupper(letters[1:ntrt]))
@@ -95,7 +98,7 @@ write_csv(overallCRDdata,"overallCRDdata.csv")
 #' ## Analysis of raw data
 #' 
 #' ## Naive common effects analysis
-## ----fixedanalysis---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----fixedanalysis---------------------------------------------------------------------------------------------------------------------------------------------------
 # Analysis of raw data
 
 #IPD (Individual Performance Data)
@@ -107,7 +110,7 @@ emm_options(pbkrtest.limit = nrow(overallCRDdata))  # allows KR degrees of freed
   # naive analysis that ignores study effects
 
 # Common effects analysis (Ignoring Study Heterogeneity!)
-fixed_analysis = lm(FCM~Trt,data=overallCRDdata)  # Fit Trt as Fixed 
+fixed_analysis = lm(FCM~Trt,data=overallCRDdata)  # Fit Trt as only factor
 summary(fixed_analysis)
 fixed_Trt= emmeans(fixed_analysis,"Trt")
 (fixed_effects_means = summary(fixed_Trt))
@@ -115,12 +118,12 @@ fixed_Trt= emmeans(fixed_analysis,"Trt")
 
 #' 
 #' 
-#' ## mixed model analysis
+#' ## Mixed model analysis
 #' 
 #' #### NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
 #' #### accounts for study heterogeneity
 #' 
-## ----mixedanalysis---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----mixedanalysis---------------------------------------------------------------------------------------------------------------------------------------------------
 library(lme4)  # mixed model procedure in R.
 overall_analysis = lmer(FCM~Trt+(1|Study/Trt),data=overallCRDdata)  # Fit Trt as Fixed, Study and Study*Trt as random
 summary(overall_analysis)
@@ -133,7 +136,7 @@ lsmeansraw_Trt= emmeans(overall_analysis,"Trt")
 #' 
 #' ## Study effects (Estimated versus True)
 #' 
-## ----Studyeffects----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Studyeffects----------------------------------------------------------------------------------------------------------------------------------------------------
 # This is really not important but it might be need to see how the estimated (Predicted) study effects line up with the truth
 # Estimated ("Predicted") Study Effects
 BLUP_Studyeffects = coef(overall_analysis)$Study[,1]-mean(coef(overall_analysis)$Study[,1])  # need to subtract the mean to express relative to zero
@@ -147,7 +150,7 @@ ggplot(data=trt,aes(x=Studyeffects ,y=BLUP_Studyeffects)) + geom_point() + geom_
 
 #' ## Study by Treatment effects (Estimated versus True)
 #' 
-## ----studybytreatment------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----studybytreatment------------------------------------------------------------------------------------------------------------------------------------------------
 # Let's do the same thing for the study by treatment effects
 #Estimated study by treatment effects 
 BLUP_study_trt = coef(overall_analysis)$`Trt:Study`[,1]-mean(coef(overall_analysis)$`Trt:Study`[,1]) # need to subtract the mean to express relative to zero
@@ -168,7 +171,8 @@ ggplot(study_trt,aes(x=study_trt ,y=BLUP_study_trt)) + geom_point() + geom_ablin
 #'  A frequentist approach to this often doesn't converge.
 #'  The following frequentist analysis only considers heterogeneous residual variances
 #'  
-## ----heteroresidual--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----heteroresidual--------------------------------------------------------------------------------------------------------------------------------------------------
+if(heterorun) {
 library(nlme)
 # modeling heterogeneous residual variances across Studies and including random effects of Study and Treatment by Study
 ##  THIS MIGHT BE CONSIDERED THE REFERENCE ANALYSIS AGAINST A META-ANALYSIS ONLY USING SUMMARY STATISTICS IF INDIVIDUAL COW DATA WAS READILY AVAILABLE AND RESIDUAL VARIABILITY WAS TRULY HETEROGENEOUS ACROSS STUDIES
@@ -184,20 +188,20 @@ lsmeansraw_Trt_hetero= emmeans(hetero.lme,"Trt")
 # doesn't seem to be a big difference between the two (hetero versus homogeneous residual variances)
 (effectsize_raw_hetero  = pairs(lsmeansraw_Trt_hetero))
 effectsize_raw
-
+}
 
 
 #'  
 #' In reality the real gold standard would allow all variance components to be heterogeneous across studies or herds but that would require a solid Bayesian analysis (e.g. https://pubmed.ncbi.nlm.nih.gov/27865511/ or  https://gsejournal.biomedcentral.com/articles/10.1186/1297-9686-37-1-31 ) which is beyond the scope of this course.
 #'  
-#'  # Meta-analysis
+#' #Meta-analysis using summary statistics
 #'  
 #'  Let's create the meta-analysis data points (effect size, stderr) for each experiment
 #'  
 #'  
 #'  First need to create some functions
 #'  
-## ----metafunctions---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----metafunctions---------------------------------------------------------------------------------------------------------------------------------------------------
  #need to create some functions first.
 # need to create a separate function for model
 separate_model = function(df) {
@@ -221,9 +225,22 @@ lsmeans = function(model) {
 
 
 #'  
+#' 
+#' This is what the analysis would look like for one study (Study #1)
+## ----Study1----------------------------------------------------------------------------------------------------------------------------------------------------------
+Study1_analysis = lm(FCM~Trt,data=filter(overallCRDdata,Study==1))
+joint_tests(Study1_analysis)
+summary(Study1_analysis)
+lsmeans(Study1_analysis)
+contrast(Study1_analysis)
+
+
+#' 
+#' 
+#' 
 #' Create the sample statistics for each trial
 #' 
-## ----metastats-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----metastats-------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_contrasts = overallCRDdata %>%
   group_by(Study) %>%
   nest() %>%
@@ -239,9 +256,11 @@ head(Study_specific_contrasts)
 
 #' 
 #' 
-## ----boxplot---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----boxplot---------------------------------------------------------------------------------------------------------------------------------------------------------
 # this might not be too helpful to look at if there is a lot of differences in standard errors between studies.
-boxplot(Study_specific_contrasts$estimate,main="Box plot of study-specific treatment differences")
+boxplot(estimate~contrast,main="Box plot of study-specific treatment differences",data=Study_specific_contrasts)
+# let's just consider the A-B contrast for now
+Study_specific_contrastsAB = filter(Study_specific_contrasts,contrast=='A - B')
 
 #'  
 #'  
@@ -249,14 +268,14 @@ boxplot(Study_specific_contrasts$estimate,main="Box plot of study-specific treat
 #' 
 #' 1) Basic calculation
 #' 
-## ----CE1-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-weighted.mean(Study_specific_contrasts$estimate,Study_specific_contrasts$weight)
-(stderr = (sum(Study_specific_contrasts$weight))^(-1/2))
+## ----CE1-------------------------------------------------------------------------------------------------------------------------------------------------------------
+weighted.mean(Study_specific_contrastsAB$estimate,Study_specific_contrastsAB$weight)
+(stderr = (sum(Study_specific_contrastsAB$weight))^(-1/2))
 
 #' 
 #' 2) Linear model
 #' 
-## ----CE2-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----CE2-------------------------------------------------------------------------------------------------------------------------------------------------------------
 # glmmTMB is used because it allows one to fix the residual variance to 1 (just a "trick" to allow proper weightings by 1/SE^2 which already reflect residual var!)
 library(glmmTMB)
 # overall mean model
@@ -264,7 +283,7 @@ FM_1meta <- glmmTMB(estimate ~ 1 ,
                 weights = weight,
                 family = gaussian,
                 REML=TRUE,
-                data = Study_specific_contrasts,
+                data = Study_specific_contrastsAB,
                 start = list(betad = log(1)),  # fix residual variance = 1
                 map = list(betad = factor(NA))
 )
@@ -273,9 +292,9 @@ summary(FM_1meta)
 #' 
 #' 3) Using metafor.  Also provides a forest plot
 #' 
-## ----CE3-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----CE3-------------------------------------------------------------------------------------------------------------------------------------------------------------
 library(metafor)
-(res_EE = rma.uni(yi=estimate,vi=sampvar,data=Study_specific_contrasts,method="EE"))  # common effects
+(res_EE = rma.uni(yi=estimate,vi=sampvar,data=Study_specific_contrastsAB,method="EE"))  # common effects
 forest(res_EE)
 
 #' 
@@ -287,7 +306,7 @@ forest(res_EE)
 #' 
 #' 1) Mixed effects model
 #' 
-## ----RM_1meta--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----RM_1meta--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 library(glmmTMB)
 # random effects model
@@ -295,7 +314,7 @@ RM_1meta <- glmmTMB(estimate ~ 1 + (1|Study),
               weights = weight,
               family = gaussian,
               REML=TRUE,
-              data = Study_specific_contrasts,
+              data = Study_specific_contrastsAB,
               start = list(betad = log(1)),  # fix residual variance = 1
               map = list(betad = factor(NA))
 )
@@ -304,37 +323,39 @@ summary(RM_1meta)
 
 #' 
 #' 
-## ----varcompest------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----varcompest------------------------------------------------------------------------------------------------------------------------------------------------------
 vc = VarCorr(RM_1meta)  # variance components
 print(vc,comp=("Variance"))
 
 
-#' 2) Metafor
+#' 2) metafor
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-(res_REML = rma.uni(yi=estimate,vi=sampvar,data=Study_specific_contrasts,method="REML"))  # default
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+(res_REML = rma.uni(yi=estimate,vi=sampvar,data=Study_specific_contrastsAB,method="REML"))  # default
 forest(res_REML)
 
-#' 
+#' Compare the width of this interval to the one provided by the common effects model
 #' 
 #' ## Likelihood ratio test
 #' 
+#' How to choose between the mixed effects and common effects model??
 #' Two ways to do this.
-## ----LRT1------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----LRT1------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# mixed model
 anova(res_EE,res_REML)  # likelihood ratio test to test for differences in heterogeneity.
 
+# metafor has it built in too
 anova(FM_1meta,RM_1meta)  # this works too.
 
 
 #' 
-#' ## Confidence and Prediction Intervals under the Mixed Model Analysis
+#' ## Confidence and Prediction Intervals for Contrasts under the Mixed Model Analysis
 #' 
-#' where confidence intervals are useful for assessing reliability of the meta-estimate for the corresponding parameter, the prediction interval indicates what is the plausible
-#' range of responses in future experiments.
+#' where confidence intervals are useful for assessing reliability of the meta-estimate for the corresponding parameter, the prediction interval indicates what is the plausible range of responses in future experiments.
 #' 
 #' This may be more pertinent for an "extension"-based message in terms of relaying to farmers,consultants, etc. what uncertainty they may anticipate with respect to their own operations.
-## ----CI_PI-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----CI_PI-----------------------------------------------------------------------------------------------------------------------------------------------------------
 # confirming the metafor CI on the effect size using the mixed model analysis.
 Studyvar = c(((VarCorr(RM_1meta))["cond"]$cond$Study))
 overallest = coef(summary(RM_1meta))$cond
@@ -352,12 +373,11 @@ cat("Prediction Interval",sep="\n")
 #' 
 #' 
 #' 
-#' # Arm Analysis
+#' # Arm Based Analysis
 #' 
+#' Let's consider study-specific means rather than study-specific mean differences as the response variable.
 #' 
-#' Let's consider means rather than mean differences as the response variable.
-#' 
-## ----studymeans------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----studymeans------------------------------------------------------------------------------------------------------------------------------------------------------
 # Suppose you have study specific means instead
 # often referred to as "arm-based" (rather than contrast-based) analysis.
 
@@ -384,7 +404,7 @@ boxplot(emmean~Trt,data=Study_specific_means,main="Study-specific treatment mean
 #' ### Mixed model software based
 #' 
 #' 1) Typical (incomplete) mixed model meta-analysis observed in dairy/animal sciences
-## ----Model_R0--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Model_R0--------------------------------------------------------------------------------------------------------------------------------------------------------
 # this is what many animal scientists seem to be doing.
 RM_0arm <- glmmTMB(emmean ~ Trt + (1|Study),
                      weights = (1/SE^2),
@@ -407,7 +427,7 @@ effectsize_raw
 #' 
 #' One needs to model random inconsistency as well!!!!
 #' 
-## ----Model_R1--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Model_R1--------------------------------------------------------------------------------------------------------------------------------------------------------
 # you need to model random inconsistency as well!   
 # (this is model R1 in Madden et al. (2016))
 RM_1arm <- glmmTMB(emmean ~ Trt + (1|Study/Trt),
@@ -429,7 +449,7 @@ effectsize_raw
 #' 
 #' Model R3 in Madden et al. (2016)
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # The following is an alternative based on separate variances for each treatment
 # Model R3 in Madden et al. 2016...specifies study variances to be different for each treatment (UN= unstructured)
 RM_3arm <- glmmTMB(emmean ~ Trt + (Trt-1|Study),
@@ -445,6 +465,26 @@ lsmeans_R3_Trt= emmeans(RM_3arm,"Trt")
 summary(lsmeans_R3_Trt)
 (effectsize_R3_Trt = pairs(lsmeans_R3_Trt))
 
+#' What too many people are doing right now!
+#' Estimating the residual variance and just treating study as a random effect
+#' 
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# The following is an alternative based on separate variances for each treatment
+# Model R3 in Madden et al. 2016...specifies study variances to be different for each treatment (UN= unstructured)
+RM_wrong<- glmmTMB(emmean ~ Trt + (1|Study),
+                     weights = (1/SE^2),
+                     family = gaussian,
+                     REML=TRUE,
+                     data = Study_specific_means
+)
+summary(RM_wrong)
+emmeans(RM_wrong,"Trt")
+summary(emmeans(RM_wrong,"Trt"))
+(effectsize_R3_Trt = pairs(emmeans(RM_wrong,"Trt")))
+cat("Compare this to inferences from analyzing the raw data",sep="\n")
+effectsize_raw
+
+#' 
 #' 
 #' ### Using metafor
 #' 
@@ -452,7 +492,7 @@ summary(lsmeans_R3_Trt)
 #' Model M1:  equal study variance for each treatment and equal covariance between any pair of treatments.
 #' Model M3:  unequal study variances for each treatment and unequal covariances between any pair of treatments
 #' 
-## ----metafor_mv------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----metafor_mv------------------------------------------------------------------------------------------------------------------------------------------------------
 #Need to use the multivariate option of metafor!!
 library(metafor)
 # incomplete accounting for heterogeneity -> does not model random inconsistency!
@@ -486,22 +526,24 @@ library(metafor)
 #' 
 #' # Likelihood ratio test
 #' 
-## ----LRT2------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----LRT2------------------------------------------------------------------------------------------------------------------------------------------------------------
 anova(RM_0arm,RM_1arm,RM_3arm) # using mixed model
 anova(res.mv1a,res.mv3a)
 
 #' 
 #' 
 #' ## Compare Study specific standard errors of means (SEM) to Study specific standard errors of mean differences (SED)
+#' ## just look at A vs B
 #' 
 #'  For CRDs, SEM = SED / sqrt(2)
 #' 
-## ----SEMvSED---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----SEMvSED---------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_SEM = Study_specific_means %>% 
+   filter(Trt =='A' | Trt=='B')%>%
    group_by(Study) %>%
    summarize(SEM=mean(SE))
 
-Study_specific_SED = Study_specific_contrasts %>% 
+Study_specific_SED = Study_specific_contrastsAB %>% 
    group_by(Study) %>%
    summarize(SED=mean(SE))
 
