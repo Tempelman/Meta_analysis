@@ -10,25 +10,28 @@
 #' # This document is used to highlight considerations for meta-analysis of Latin square/crossover designs
 #' 
 #' 
-## ----setup, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------
 rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
 library(tidyverse,ggplot2)
+set.seed(100)  # set seed for reproducibility.
+nStudy = 30  # Number of studies
+ntrt = 3    # Number of treatments 
+ncows =sample(seq(ntrt*4,ntrt*10,ntrt),nStudy,replace=TRUE)  # simulated different number of replicated squares per Study
 # set default directory
 
 #' 
 #' ## Simulation
 #' 
-#' Simulate a n_trt treatment Latin square design from a number of different studies
+#' Simulate a $n_{trt}$ = `r ntrt`  treatment Latin square design data from `r nStudy` different studies with
+#' sample sizes ranging from `r ntrt*4` to `r ntrt*10` cows
 #' 
-## ----Simulate--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Simulate--------------------------------------------------------------------------------------------------------------------------------------------------------
 ##### THE FOLLOWING JUST SIMULATES SOME DATA BASED ON THE FOLLOWING SPECIFICATIONS   #####
 ##########################################################################################################
 ######################## BEGINNING OF SIMULATION #########################################################
 ##########################################################################################################
-set.seed(100)  # set seed for reproducibility.
-nStudy = 30  # Number of studies
-ntrt = 3    # Number of treatments 
+
 
 sigmae = 2  # residual (within cow) variance
 sigmacow = 8  # between-cow variance
@@ -44,15 +47,13 @@ if (length(trteffects) != ntrt) stop ("need to change the number of treatment ef
 periodeffects = rnorm(sd=sqrt(sigmaperiod),nStudy*ntrt)
 StudyPeriod = split(periodeffects, ceiling(seq_along(periodeffects)/ntrt))
 
-
-
 Studyeffects = rnorm(sd=sqrt(sigmastudy),nStudy)  # simulated study effects
 studytrtint = vector(mode="list",length= nStudy)  # simulated study x treatment effects
 for (Study in 1:nStudy){
   studytrtint[[Study]]=rnorm(sd = sqrt(sigmastudytrt),ntrt)
 }
 
-ncows =sample(seq(ntrt*4,ntrt*10,ntrt),nStudy,replace=TRUE)  # simulated different number of replicated squares per Study
+
 # for a balanced multiple Latin square design, ncows has to be a multiple of number of treatments
 
 setuplatin =vector(mode="list",length=ntrt)
@@ -100,7 +101,7 @@ study_trt = data.frame(Study_Trtlabels,study_trt)
 #' 
 #' # Analysis based on individual cow records across experiments
 #' 
-## ----IPD-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----IPD-------------------------------------------------------------------------------------------------------------------------------------------------------------
 library(lme4)  # mixed model procedure in R.
 # NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
 ## of course, we really never know the true model!
@@ -117,13 +118,11 @@ lsmeans_Trt= emmeans(overallcrossover_analysis,"Trt")
 (overallcrossover_means = summary(lsmeans_Trt))
 (effectsize_IPD = pairs(lsmeans_Trt))  # overall effect sizes
 
-
-
 #' 
 #' 
-#' The following is just for quality control checks
+#' The following is just for quality control checks on my simulation program
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----qualitycontrol--------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## THE FOLLOWING IS NOT REALLY IMPORTANT...JUST A QUALITY CONTROL CHECK
 ##Plot Estimated(Predicted) Study Effects versus True Study Effects
@@ -156,7 +155,7 @@ ggplot(study_trt,aes(x=study_trt ,y=BLUP_study_trt)) + geom_point() + geom_ablin
 #' 
 #' Write a few functions that will help compute the study-specific statistics.
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----functionspecs---------------------------------------------------------------------------------------------------------------------------------------------------
 # Let's conduct a separate mixed model analysis for each Study
 # just like what we would anticipate for a meta-analysis
 # Need to write some functions in order to do so
@@ -195,8 +194,8 @@ varcomps = function(model){
 
 
 #' 
-#' This is what it looks like for one study
-## ----Study1----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#' This is what it looks like for one study (Study 1)
+## ----Study1----------------------------------------------------------------------------------------------------------------------------------------------------------
 Study1_analysis = lmer(FCM~Trt+Period+(1|Cow),data=filter(overallcrossoverdata,Study==1))
 joint_tests(Study1_analysis)
 summary(Study1_analysis)
@@ -207,7 +206,7 @@ contrast(Study1_analysis)
 
 #' 
 #' 
-## ----Study_spec_contrasts--------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Study_spec_contrasts--------------------------------------------------------------------------------------------------------------------------------------------
 # Let's save the contrasts (i.e. pairwise comparisons) from each study
 Study_specific_contrasts = overallcrossoverdata %>%
   group_by(Study) %>%
@@ -227,7 +226,7 @@ head(Study_specific_contrasts)
 #' 
 #' We'll consider the common effects 
 #' 
-## ----CommonAvsB------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----CommonAvsB------------------------------------------------------------------------------------------------------------------------------------------------------
 
 (AB_contrast = filter(Study_specific_contrasts,contrast=="A - B"))
 # The following analysis is rather common (and typically wrong!!!)
@@ -236,7 +235,7 @@ head(Study_specific_contrasts)
 #CE1
 weighted.mean(AB_contrast$estimate,AB_contrast$weight)
 (stderr = (sum(AB_contrast$weight))^(-1/2))
-#compare this to what we determined from the overall analysis on the raw data
+cat ("compare with analyses on individual data",sep="\n")
 effectsize_IPD
 
 # could go through the same exercise for the other comparisons as well.
@@ -258,6 +257,8 @@ FMAvsB_1 <- glmmTMB(estimate ~ 1 ,
 )
 summary(FMAvsB_1)
 # again gives the same wrong answer as above
+cat ("compare with analyses on individual data",sep="\n")
+effectsize_IPD
 
 #CE3
 # Finally, onecan use metafor to get the same result:
@@ -266,7 +267,7 @@ library(metafor)
 forest(res_EE_AvsB)
 
 #' 
-## ----MixedAvB--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----MixedAvB--------------------------------------------------------------------------------------------------------------------------------------------------------
 # an analysis that properly reflects heterogeneity between studies.
 library(glmmTMB)
 # random effects model
@@ -279,11 +280,14 @@ RM_1AvsB_1 <- glmmTMB(estimate ~ 1 + (1|Study),  # Study really involves both St
                 map = list(betad = factor(NA))
 )
 summary(RM_1AvsB_1)  
-# compare this to the analysis using the raw data...point estimate is ok; standard error is off.
+cat ("compare with analyses on individual data",sep="\n")
+effectsize_IPD
+# compare this to the analysis using the raw data...point estimate is ok; standard error is a little off.
 
 #using metafor
 (res_REMLAvsB_1 = rma.uni(yi=estimate,vi=sampvar,data=AB_contrast,method="REML"))  # fixed study effects
 # reminder as to what the corresponding estimate/se was from analyzing the raw data
+cat ("compare with analyses on individual data",sep="\n")
 effectsize_IPD
 
 
@@ -291,7 +295,7 @@ effectsize_IPD
 #' 
 #' # Multivariate analysis using all contrast information
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----allcontrasts----------------------------------------------------------------------------------------------------------------------------------------------------
 
 RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),   # models the effect of study and study*contrast
                  weights = weight,
@@ -303,7 +307,26 @@ RM_mvcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),   # models
 )
 summary(RM_mvcontrast)
 
-# compare with analyses on individual data.  Almost matches perfectly!!
+cat ("compare with analyses on individual data .  Almost matches perfectly!!",sep="\n")
+effectsize_IPD
+
+
+#' 
+## ----foundationalcontrasts-------------------------------------------------------------------------------------------------------------------------------------------
+
+foundationcontrast <- glmmTMB(estimate ~ contrast -1 + (1|Study/contrast),   # models the effect of study and study*contrast
+                 weights = weight,
+                 family = gaussian,
+                 REML=TRUE,
+                 data = filter(Study_specific_contrasts,contrast != 'A - B'),
+                 start = list(betad = log(1)),  # fix residual variance = 1
+                 map = list(betad = factor(NA))
+)
+summary(foundationcontrast)
+lsmeans_foundationcontrast= emmeans(foundationcontrast,"contrast")
+(summary(lsmeans_foundationcontrast))
+pairs(lsmeans_foundationcontrast)
+cat ("compare with analyses on individual data",sep="\n")
 effectsize_IPD
 
 
@@ -311,7 +334,7 @@ effectsize_IPD
 #' # Analysis based on Study specific means (Arm based analysis)
 #' (instead of contrasts)
 #' 
-## ----Studyspecmeans--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Studyspecmeans--------------------------------------------------------------------------------------------------------------------------------------------------
 #lets save the study specific means
 
 Study_specific_means = overallcrossoverdata %>%
@@ -329,7 +352,7 @@ Study_specific_means = overallcrossoverdata %>%
 head(Study_specific_means)
 
 #' 
-## ----subopt----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----subopt----------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Let's use the suboptimal weights anyways
 
 RM_mv_subopt <- glmmTMB(emmean ~ Trt   + (1|Study/Trt),  # 
@@ -351,7 +374,7 @@ effectsize_IPD
 #' 
 #' # Let's look at study-specific variance components
 #' 
-## ----Study_specific_var----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Study_specific_var----------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_var = overallcrossoverdata %>%
   group_by(Study) %>%
   nest() %>%
@@ -363,7 +386,7 @@ Study_specific_var = overallcrossoverdata %>%
 boxplot(Study_specific_var[,-1] )
 
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Let's look at the relationship between SEM, SED, and the variance components
 
 
@@ -384,17 +407,20 @@ SE_compare =  Study_specific_means %>%
 head(SE_compare)
 
 #' 
-## ----weight_comparison-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----weight_comparison-----------------------------------------------------------------------------------------------------------------------------------------------
 ggplot(SE_compare, aes(x=weight_old, y=weight_altered)) + 
   geom_point() 
 
 
 #' 
 #' 
-## ----Means_analysis--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Means_analysis--------------------------------------------------------------------------------------------------------------------------------------------------
+SED_basic  = SE_compare %>%
+  dplyr::select(c(Study,SEM,SED))
 Study_specific_means2= Study_specific_means%>%
-  mutate(SEM_altered = SE/sqrt(2)) %>%
-  mutate(weight_altered = (1/SEM_altered)^2) %>%  # What i use in the mixed model
+  full_join(SED_basic,by="Study")%>%
+  mutate(SEM_altered = SED/sqrt(2)) %>%
+  mutate(weight_altered = (1/SEM_altered)^2) %>%  
   mutate(sampvar_altered = SEM_altered^2)  
 
 RM_mv2arm <- glmmTMB(emmean ~ Trt   + (1|Study/Trt),   
@@ -409,12 +435,14 @@ summary(RM_mv2arm)
 lsmeans_Trt_mv2arm= emmeans(RM_mv2arm,"Trt")
 ( summary(lsmeans_Trt_mv2arm))
 pairs(lsmeans_Trt_mv2arm)
+cat ("compare with analyses on individual data",sep="\n")
+effectsize_IPD
 
 #' ## A network meta-analysis
 #'  
 #' Use same simulated datasets as above but this time just randomly choose two of three treatments from each study  
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----createIB--------------------------------------------------------------------------------------------------------------------------------------------------------
 trtchoose = vector(mode="list",length= nStudy)  # 
 
 for (Study in 1:nStudy) {
@@ -435,7 +463,7 @@ IB_Data = IB_design %>%
 
 #' 
 #' ## analysis of IB data
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----IBanalysis------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # NOTE THIS MODEL PERFECTLY MATCHES THE MODEL GENERATION PROCESS
 IB_analysis = lmer(FCM~Trt+ (1|Period:Study) + (1|Cow:Study) + (1|Study/Trt),data=IB_Data)  # Fit Trt as Fixed, Study and Study*Trt as random
@@ -450,7 +478,7 @@ lsmeans_TrtIB= emmeans(IB_analysis,"Trt")
 
 #' # Study specific contrasts
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----study_specific_contrast-----------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_contrasts_IB = IB_Data %>%
   group_by(Study) %>%
   nest() %>%
@@ -467,7 +495,7 @@ Study_specific_contrasts_IB = IB_Data %>%
 #' # Naively only considering studies with A-B contrasts
 #' 
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----ABonly----------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_contrasts_IB_AB = filter(Study_specific_contrasts_IB,contrast == 'A - B')
  
  # random effects model
@@ -486,7 +514,7 @@ effectsize_IB
 
 #' # can also use study-specific means to do this
 #' 
-## --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----Arm_IB----------------------------------------------------------------------------------------------------------------------------------------------------------
 Study_specific_means_IB = IB_Data %>%
   group_by(Study) %>%
   nest() %>%
@@ -525,5 +553,3 @@ effectsize_IB
 
 
 #' 
-#' 
-#' ```
