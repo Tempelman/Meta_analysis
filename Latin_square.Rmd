@@ -15,16 +15,16 @@ rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
 library(tidyverse,ggplot2)
 set.seed(100)  # set seed for reproducibility.
-nStudy = 30  # Number of studies
+nStudy = 50  # Number of studies
 ntrt = 3    # Number of treatments 
-ncows =sample(seq(ntrt*4,ntrt*10,ntrt),nStudy,replace=TRUE)  # simulated different number of replicated squares per Study
+ncows =sample(seq(ntrt*2,ntrt*10,ntrt),nStudy,replace=TRUE)  # simulated different number of replicated squares per Study
 # set default directory
 ```
 
 ## Simulation
 
 Simulate a $n_{trt}$ = `r ntrt`  treatment Latin square design data from `r nStudy` different studies with
-sample sizes ranging from `r ntrt*4` to `r ntrt*10` cows
+sample sizes ranging from `r ntrt*2` to `r ntrt*10` cows
 
 ```{r Simulate}
 ##### THE FOLLOWING JUST SIMULATES SOME DATA BASED ON THE FOLLOWING SPECIFICATIONS   #####
