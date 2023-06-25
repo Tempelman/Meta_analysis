@@ -11,14 +11,17 @@ output: html_document
 
 
 ```{r setup, include=FALSE}
-rm(list=ls())
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/Simulation")
+# set default directory
+```
+
+```{r prep}
+rm(list=ls())
 library(tidyverse,ggplot2)
 set.seed(100)  # set seed for reproducibility.
 nStudy = 50  # Number of studies
 ntrt = 3    # Number of treatments 
 ncows =sample(seq(ntrt*2,ntrt*10,ntrt),nStudy,replace=TRUE)  # simulated different number of replicated squares per Study
-# set default directory
 ```
 
 ## Simulation
