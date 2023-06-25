@@ -334,6 +334,9 @@ effectsize_IPD
 # Analysis based on Study specific means (Arm based analysis)
 (instead of contrasts)
 
+A suboptimal analysis:
+The use of regular standard errors on means would not be advisable in this case!
+
 ```{r Studyspecmeans}
 #lets save the study specific means
 
@@ -351,9 +354,9 @@ Study_specific_means = overallcrossoverdata %>%
 
 head(Study_specific_means)
 ```
-
+Let's use the suboptimal weights anyways
 ```{r subopt}
-#  Let's use the suboptimal weights anyways
+
 
 RM_mv_subopt <- glmmTMB(emmean ~ Trt   + (1|Study/Trt),  # 
                  weights = weight,
@@ -389,7 +392,6 @@ boxplot(Study_specific_var[,-1] )
 ```{r}
 #Let's look at the relationship between SEM, SED, and the variance components
 
-
 SE_compare =  Study_specific_means %>%
     group_by(Study) %>%
     summarize(SEM = mean(SE))  %>%
@@ -406,6 +408,8 @@ SE_compare =  Study_specific_means %>%
     mutate(sampvar_old= SEM^2)  
 head(SE_compare)
 ```
+
+Lesson: ratio of SEM to SED/sqrt(2) is same as sqrt(cow+residual/residual VC)
 
 ```{r weight_comparison}
 ggplot(SE_compare, aes(x=weight_old, y=weight_altered)) + 
