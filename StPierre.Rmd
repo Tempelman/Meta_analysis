@@ -8,10 +8,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-rm(list=ls())  # always a good idea to clean-up the directory
 knitr::opts_chunk$set(echo = TRUE,root.dir="C:/Users/Robert J. Tempelman/OneDrive - Michigan State University/Tempelman/Meta_analysis/StPierre")
-library(tidyverse,ggplot)
 # set default directory
+```
+
+```{r prep}
+rm(list=ls())  # always a good idea to clean-up the directory
+library(tidyverse,ggplot)
 ```
 
 ## Introduction
