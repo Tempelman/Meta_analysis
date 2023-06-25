@@ -24,8 +24,8 @@ We'll revisit the simulated data provided by Dr. St_Pierre in the following pape
 The following is the original data as provided in the Appendix from St-Pierre (2001)... The first few observations are also printed with the head() function.  Let's double-check the data against the Appendix
 
 ```{r origdata}
-getwd()
-Dataregs2 = read_csv("Dataregs2.csv")  # Data provided in Appendix of St-Pierre (2001)
+urlfile="https://raw.githubusercontent.com/Tempelman/Meta_analysis/main/Dataregs2.csv"
+Dataregs2<-read_csv(url(urlfile)) # Data provided in Appendix of St-Pierre (2001)
 str(Dataregs2)
 head(Dataregs2)
 ```
@@ -42,7 +42,8 @@ Corrected data was kindly provided by Dr. White as forwarded from Dr. St-Pierre.
 
 
 ```{r reviseddata}
-Dataregs1 = read_csv("Dataregscorrected.csv")  # Revised data
+urlfile2="https://raw.githubusercontent.com/Tempelman/Meta_analysis/main/Dataregscorrected.csv"
+Dataregs1<-read_csv(url(urlfile2)) # Revised data
 head(Dataregs1)
 ```
 such that the revised corrected scatterplot looks as follows (and precisely what is provided in Figure 2A in St Pierre 2001):
@@ -355,6 +356,7 @@ Notice that **metafor** requires the specification of sampling variances, not we
 (res_REML = rma.uni(yi=estimate,vi=sampvar,data=Dataregs_slopes,method="REML"))  # default
 forest(res_REML)
 ```
+Compare the width of the confidence interval for the mixed model (immediately above as the bottom interval of [0.97,1.20]) to that previously provided for the common effects model
 
 
 
@@ -400,9 +402,10 @@ summary(CE_1forgot)
 
 ```
 
-Wow you would badly understate the uncertainty.
+Wow, you would badly understate the uncertainty!!
 
 The mixed effects model accounting for Study heterogeneity (adding (1|Study)) would not even run if you tried to estimate the residual variance (get an error message)
+
 
 # Multivariate analysis of intercept and slope.
 
