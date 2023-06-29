@@ -1,11 +1,11 @@
 
 # Meta Analysis Workshop
-### Robert J. Tempelman
-### Michigan State University
-### National Animal Nutrition Program Workshop
-### 2023 American Dairy Science Association Meetings
-### June 25, 2023
-### Ottawa, Canada
+#### Robert J. Tempelman
+#### Michigan State University
+#### National Animal Nutrition Program Workshop
+#### 2023 American Dairy Science Association Meetings
+#### June 25, 2023
+#### Ottawa, Canada
 
 These are the meta-analysis workshop materials developed for the NANP workshop June 25, 2023
 
