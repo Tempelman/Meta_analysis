@@ -1,16 +1,11 @@
 
 # Meta Analysis Workshop
-
-<p style="text-align: center;"> ================================================ </p>
-<p style="text-align: center;"> Meta Analysis Workshop</p>
-<p style="text-align: center;"> Robert J. Tempelman </p>
-<p style="text-align: center;"> Michigan State University </p>
-<p style="text-align: center;"> National Animal Nutrition Program Workshop</p>
-<p style="text-align: center;"> 2023 American Dairy Science Association Meetings</p>
-<p style="text-align: center;"> June 25, 2023</p>
-<p style="text-align: center;"> Ottawa, Canada</p>
-<p style="text-align: center;"> =============================================== </p>
-
+## Robert J. Tempelman
+## Michigan State University
+## National Animal Nutrition Program Workshop
+## 2023 American Dairy Science Association Meetings
+## June 25, 2023
+## Ottawa, Canada
 
 These are the meta-analysis workshop materials developed for the NANP workshop June 25, 2023
 
