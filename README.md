@@ -1,3 +1,6 @@
+
+# Meta Analysis Workshop
+
 <p style="text-align: center;"> ================================================ </p>
 <p style="text-align: center;"> Meta Analysis Workshop</p>
 <p style="text-align: center;"> Robert J. Tempelman </p>
