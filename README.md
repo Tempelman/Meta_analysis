@@ -1,4 +1,4 @@
-
+<p style="text-align: center;">A piece of centered text</p>
 # Meta Analysis Workshop
 #### Robert J. Tempelman
 #### Michigan State University
