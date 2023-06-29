@@ -1,4 +1,4 @@
-<h1 style="text-align: center;">Test</h1>
+ 
 
 # Meta Analysis Workshop
 #### Robert J. Tempelman
