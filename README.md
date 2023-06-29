@@ -1,4 +1,4 @@
-<p style="text-align: center;">A piece of centered text</p>
+<h1 style="text-align: center;">Test</h1>
 
 # Meta Analysis Workshop
 #### Robert J. Tempelman
